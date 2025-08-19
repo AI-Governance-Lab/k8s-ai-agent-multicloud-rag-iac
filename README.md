@@ -238,11 +238,12 @@ This design keeps the backend UI‑agnostic and easy to embed in portals, consol
 ```mermaid
 flowchart TD
   User[User / Operator]
+
   subgraph Kubernetes_Cluster
     AgentPod[AI Agent Pod - FastAPI + LangChain]
     TFJob[Terraform Runner - K8s Job]
     Qdrant[Qdrant Vector DB]
-    PVC[Persistent Volume (code/logs)]
+    PVC[(Persistent Volume)]
   end
 
   subgraph LLM_Providers
@@ -272,10 +273,7 @@ flowchart TD
   TFJob -->|Reads/Writes| PVC
 
   classDef guard fill:#f9f9ff,stroke:#556,stroke-width:1px;
-  Governance[Governance & Security
-  • RBAC, NetworkPolicies
-  • Policy-as-Code (OPA/Kyverno)
-  • Secrets mgmt, Audit, Supply chain]:::guard
+  Governance["Governance & Security<br/>RBAC, NetworkPolicies<br/>Policy-as-Code (OPA/Kyverno)<br/>Secrets mgmt, Audit, Supply chain"]:::guard
   Governance --- AgentPod
   Governance --- TFJob
 ```
@@ -287,13 +285,13 @@ flowchart TD
   AIService[AI Agent Service]
   MulticloudInfra[Multicloud IaC Deployments (AWS/Azure/GCP/IBM)]
   Observability[Logging/Monitoring/Alerts]
-  Governance[Governance & Security]
+  Governance2["Governance & Security<br/>Policies, RBAC, Audit"]
 
   User -->|Self-service UI| AIService
   AIService -->|Automated IaC| MulticloudInfra
   AIService -->|Status & Outputs| Observability
-  Governance --- AIService
-  Governance --- MulticloudInfra
+  Governance2 --- AIService
+  Governance2 --- MulticloudInfra
   Observability -->|Insights| User
 ```
 
