@@ -23,6 +23,7 @@ Validated on:
 - [⚙️ Getting Started](#️-getting-started)
 - [🔌 API Capabilities & UI Integration](#-api-capabilities--ui-integration)
 - [🛡 Governance, Security, and Compliance](#-governance-security-and-compliance)
+- [🧭 AI Governance Add‑ons: Evidently AI & MLflow](#-ai-governance-add-ons-evidently-ai--mlflow)
 - [🗂️ Architecture](#️-architecture)
 - [📝 Additional Notes](#-additional-notes)
 - [🛣 Roadmap](#-roadmap)
@@ -229,6 +230,95 @@ This design keeps the backend UI‑agnostic and easy to embed in portals, consol
 - LLM Guardrails
   - Safe prompts, size limits, PII minimization
   - Provider-side safety settings where available
+
+## 🧭 AI Governance Add‑ons: Evidently AI & MLflow
+Add optional, vendor‑neutral governance to observe quality, drift, and operational metrics for RAG and IaC runs.
+
+- Evidently AI (What it is)
+  - Open‑source monitoring for ML/data quality and drift detection, with batch reports or a lightweight service.
+- Evidently AI (How we use it here)
+  - Monitor RAG inputs/outputs:
+    - Query distribution and drift (e.g., topics, length, language).
+    - Embedding distributions (vector norms/stats) and drift over time.
+    - Response quality signals (latency, error rate, citation coverage ratio, user feedback thumbs up/down).
+  - Generate periodic batch HTML reports from interaction logs, or push metrics to an Evidently service endpoint for dashboards.
+- MLflow (What it is)
+  - Open‑source experiment tracking, metrics logging, artifact storage, and model registry.
+- MLflow (How we use it here)
+  - Track LLM/RAG runs and IaC jobs:
+    - Params: provider (OpenAI/Azure/Bedrock/Ollama), model IDs, temperature/top_p, embedding model, top‑k, prompt template version.
+    - Metrics: latency, token usage/cost (if available), hit@k, response length, success/error, job duration.
+    - Artifacts: prompts, responses, retrieved chunks/sources, IaC plan/apply logs.
+  - Use the MLflow Model Registry to version “agent policies” (prompt templates + retrieval configs).
+
+Optional configuration (Helm values/env) to enable integrations:
+```yaml
+# values.yaml (example)
+governance:
+  enabled: true
+  mlflow:
+    enabled: true
+    trackingUri: "http://mlflow-server:5000"
+    experimentName: "k8s-ai-agent"
+  evidently:
+    enabled: true
+    mode: "reports"           # "reports" (batch HTML) or "service"
+    endpoint: "http://evidently:8000"  # required if mode=service
+```
+
+Kubernetes deployment env (example):
+```yaml
+# Deployment env snippet
+- name: GOVERNANCE_ENABLED
+  value: "true"
+- name: MLFLOW_TRACKING_URI
+  valueFrom:
+    configMapKeyRef:
+      name: {{ .Values.agentName }}-config
+      key: mlflow.trackingUri
+- name: MLFLOW_EXPERIMENT_NAME
+  valueFrom:
+    configMapKeyRef:
+      name: {{ .Values.agentName }}-config
+      key: mlflow.experimentName
+- name: EVIDENTLY_MODE
+  valueFrom:
+    configMapKeyRef:
+      name: {{ .Values.agentName }}-config
+      key: evidently.mode
+- name: EVIDENTLY_ENDPOINT
+  valueFrom:
+    configMapKeyRef:
+      name: {{ .Values.agentName }}-config
+      key: evidently.endpoint
+```
+
+Minimal code hooks (illustrative):
+```python
+# Log a run to MLflow (pseudo)
+import mlflow
+mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI", ""))
+mlflow.set_experiment(os.getenv("MLFLOW_EXPERIMENT_NAME", "k8s-ai-agent"))
+with mlflow.start_run(run_name="rag_query"):
+    mlflow.log_params({"provider": provider, "model": model, "top_k": top_k})
+    mlflow.log_metrics({"latency_ms": latency, "tokens": tokens})
+    mlflow.log_text(prompt, "artifacts/prompt.txt")
+    mlflow.log_text(response_text, "artifacts/response.txt")
+
+# Generate Evidently batch report (pseudo)
+from evidently.report import Report
+from evidently.metrics import DataDriftPreset, ColumnDriftMetric
+report = Report(metrics=[DataDriftPreset()])
+report.run(reference_data=ref_df, current_data=curr_df)
+report.save_html("/app/src/jobs/evidently_report.html")
+```
+
+Deployment options
+- MLflow: run the MLflow Tracking Server on K8s with a backend DB (e.g., Postgres) and S3/MinIO artifact store, or use a managed MLflow.
+- Evidently: run the Evidently service in‑cluster, or schedule batch jobs (CronJob) to produce HTML reports and publish them behind your Ingress.
+
+Privacy & scope
+- Only non‑sensitive telemetry should be logged by default (redact secrets, keys, PII). Align with your internal policies before enabling.
 
 ---
 
