@@ -1,6 +1,6 @@
 # RAG‑Powered Multicloud IaC Agent on Kubernetes | Validated on Rancher (On‑Prem) & AWS EKS (EFS/EBS/ALB/LB/DNS)
 
-This project delivers a RAG-enabled AI Agent that automates IaC resource deployments across AWS, Azure, Google Cloud, and IBM Cloud using Terraform and Kubernetes.
+This repository provides a RAG‑enabled Kubernetes AI agent that supports custom‑document search and automates multicloud IaC deployments (AWS, Azure, GCP, IBM Cloud) using Terraform.
 
 ## What the Agent Does (At a Glance)
 - Document RAG (your data): Upload your own documents (e.g., PDF/TXT). The agent chunks, embeds, and indexes them in Qdrant, then answers queries grounded in your private knowledge base.
@@ -400,3 +400,8 @@ flowchart TD
 3. Pluggable LLM provider selection at runtime
 4. Advanced observability and job orchestration
 5. Optional: additional vector DB backends and secret
+
+---
+
+📌 Notes  
+This repository is maintained as part of my personal learning and PoC development for AI Governance.
