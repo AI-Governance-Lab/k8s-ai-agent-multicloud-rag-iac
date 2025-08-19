@@ -239,18 +239,18 @@ This design keeps the backend UI‑agnostic and easy to embed in portals, consol
 flowchart TD
   User[User / Operator]
 
-  subgraph Kubernetes_Cluster
+  subgraph K8s Cluster
     AgentPod[AI Agent Pod - FastAPI + LangChain]
-    TFJob[Terraform Runner - K8s Job]
+    TFJob[Terraform Runner - Kubernetes Job]
     Qdrant[Qdrant Vector DB]
-    PVC[(Persistent Volume)]
+    PVC[Persistent Volume]
   end
 
-  subgraph LLM_Providers
+  subgraph LLM Providers
     OpenAI[OpenAI API]
     Azure[Azure OpenAI]
     Bedrock[AWS Bedrock]
-    Ollama[Ollama (Local LLM)]
+    Ollama[Ollama - Local LLM]
   end
 
   AWS[AWS Cloud]
@@ -258,19 +258,19 @@ flowchart TD
   GCP[Google Cloud]
   IBM[IBM Cloud]
 
-  User -->|UI / API| AgentPod
-  AgentPod -->|RAG / Embeddings| Qdrant
-  AgentPod -->|LLM Calls| OpenAI
-  AgentPod -->|LLM Calls| Azure
-  AgentPod -->|LLM Calls| Bedrock
-  AgentPod -->|LLM Calls| Ollama
-  AgentPod -->|Launch IaC Job| TFJob
-  TFJob -->|Terraform Apply| AWS
-  TFJob -->|Terraform Apply| AzureCloud
-  TFJob -->|Terraform Apply| GCP
-  TFJob -->|Terraform Apply| IBM
-  AgentPod -->|Reads/Writes| PVC
-  TFJob -->|Reads/Writes| PVC
+  User -->|"UI / API"| AgentPod
+  AgentPod -->|"RAG / Embeddings"| Qdrant
+  AgentPod -->|"LLM Calls"| OpenAI
+  AgentPod -->|"LLM Calls"| Azure
+  AgentPod -->|"LLM Calls"| Bedrock
+  AgentPod -->|"LLM Calls"| Ollama
+  AgentPod -->|"Launch IaC Job"| TFJob
+  TFJob -->|"Terraform Apply"| AWS
+  TFJob -->|"Terraform Apply"| AzureCloud
+  TFJob -->|"Terraform Apply"| GCP
+  TFJob -->|"Terraform Apply"| IBM
+  AgentPod -->|"Reads/Writes"| PVC
+  TFJob -->|"Reads/Writes"| PVC
 
   classDef guard fill:#f9f9ff,stroke:#556,stroke-width:1px;
   Governance["Governance & Security<br/>RBAC, NetworkPolicies<br/>Policy-as-Code (OPA/Kyverno)<br/>Secrets mgmt, Audit, Supply chain"]:::guard
@@ -283,16 +283,16 @@ flowchart TD
 flowchart TD
   User[Platform / Cloud Team]
   AIService[AI Agent Service]
-  MulticloudInfra[Multicloud IaC Deployments (AWS/Azure/GCP/IBM)]
-  Observability[Logging/Monitoring/Alerts]
-  Governance2["Governance & Security<br/>Policies, RBAC, Audit"]
+  MulticloudInfra[Multicloud IaC Deployments]
+  Observability[Logging / Monitoring / Alerts]
+  Governance[Governance & Security - RBAC, Policies, Audit]
 
-  User -->|Self-service UI| AIService
-  AIService -->|Automated IaC| MulticloudInfra
-  AIService -->|Status & Outputs| Observability
-  Governance2 --- AIService
-  Governance2 --- MulticloudInfra
-  Observability -->|Insights| User
+  User -->|"Self-service UI"| AIService
+  AIService -->|"Automated IaC"| MulticloudInfra
+  AIService -->|"Status & Outputs"| Observability
+  Governance --- AIService
+  Governance --- MulticloudInfra
+  Observability -->|"Insights"| User
 ```
 
 ---
