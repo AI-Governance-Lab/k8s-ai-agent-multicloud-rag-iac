@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+.env
+.venv/
+.venv*/
+*.egg-info/
+
+# FastAPI / VSCode
+.vscode/
+.idea/
+*.log
+
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+*.tfvars.json
+
+# Kubernetes
+*.yaml.tmp
+k8s/secrets/
+
+# Docker
+*.pid
+*.sock
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Other
+node_modules/
+dist/
+build/
+
+# Development
+values.yaml
